@@ -1,5 +1,6 @@
 import random
 import pygame
+import math
 
 WIDTH = 600
 HEIGHT = 600
@@ -24,9 +25,10 @@ class Ball:
         mid = round(WIDTH/2)
         self.x = random.randint(mid-WIDTH//5, mid+WIDTH//5)
         self.y = 0
-        self.yvel = 5
-        self.accel = 0.01
+        self.yvel = 0
+        self.accel = 0.5
         self.xvel = 0
+        self.mag_vel = self.get_mag_vel()
 
     def draw(self, window):
         pygame.draw.circle(window, BALL_COLOUR, (self.x, self.y), self.RADIUS)
@@ -34,22 +36,28 @@ class Ball:
 
     def update(self, window):
         self.draw(window)
+        self.mag_vel = self.get_mag_vel()
 
         if self.y + self.yvel< HEIGHT:
             self.y += int(self.yvel)
             self.yvel += self.accel
         
-        self.x += self.xvel
-        
+        self.x += int(self.xvel)
+
+    def get_mag_vel(self):
+        return math.sqrt(self.xvel**2+self.yvel**2)
 
     
 class Grid:
+    COLLISION_CONSTANT = 0.8
 
     def __init__(self, window):
         
-        self.balls = [Ball(), Ball(), Ball()]
+        self.balls = [Ball(), Ball(), Ball(), Ball(), Ball(), Ball()]
         self.grid = create_grid(WIDTH, HEIGHT)
         self.window = window
+        self.node_location = []
+        self.coors_to_check = []
 
     def setup_nodes(self):
         """
@@ -72,21 +80,46 @@ class Grid:
                 
             for node in range(0, nodes_in_row):
                     self.grid[y][x_coor] = 'N'
+                    self.node_location.append((x_coor, y))
                     x_coor += SPACE
             
             nodes_in_row +=1 
             y+=SPACE
+        
+       
+        for node in self.node_location:
+            for j, y in enumerate(self.grid[node[1]-5:node[1]+6]):
+                for i, x in enumerate(y[node[0]-5:node[0]+6]):
+                        if math.sqrt((5-j)**2 + (5-i)**2) <= 5:
+                            self.coors_to_check.append((int(node[0]+i-5),int(node[1]+j-5)))
 
     def update(self):
 
         for ball in self.balls:
+            self.collision_check(ball)
             ball.update(self.window)
+            
     
     def collision_check(self, ball):
-        coors_to_check = []
-        for j,y in enumerate(self.grid):
-            for i,x in enumerate(x):
-                if x =='N':
-                    pass
-                    #coors_to_check.append()
+        
+        
+        coors_to_check_ball = []
+        for jb,yb in enumerate(self.grid[ball.y-5:ball.y+6]):
+            for ib,xb in enumerate(yb[ball.x-5:ball.x+6]):
+                if math.sqrt((5-ib)**2 + (5-jb)**2) <= ball.RADIUS:
+                    coors_to_check_ball.append((int(ball.x+ib-5), int(ball.y+jb-5)))
+                    
+        for coor in self.coors_to_check:
+            if coor in coors_to_check_ball:
+                 
+                direction_vector = (ball.x-coor[0], ball.y-coor[1])
+                mag_direction_vector = math.sqrt((ball.y-coor[1])**2+(ball.x-coor[0])**2)
+                if mag_direction_vector !=0:
+                    unit_vector = (direction_vector[0]/mag_direction_vector, direction_vector[1]/mag_direction_vector)
+                else:
+                    unit_vector = direction_vector
+                
 
+                ball.xvel = int(unit_vector[0]*ball.mag_vel*self.COLLISION_CONSTANT)
+                ball.yvel = int(unit_vector[1]*ball.mag_vel*self.COLLISION_CONSTANT)
+                

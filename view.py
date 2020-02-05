@@ -14,7 +14,7 @@ active = True
 grid = model.Grid(window)
 grid.setup_nodes()
 
-
+clock = pygame.time.Clock()
 
 while active:
     for event in pygame.event.get():
@@ -30,3 +30,4 @@ while active:
     grid.update()
     pygame.display.update()
     window.fill(BLACK)
+    clock.tick(60)
