@@ -26,7 +26,8 @@ class Ball:
         self.x = random.randint(mid-WIDTH//5, mid+WIDTH//5)
         self.y = 0
         self.yvel = 0
-        self.accel = 0.5
+        self.accel = 1
+        self.xaccel = 0
         self.xvel = 0
         self.mag_vel = self.get_mag_vel()
 
@@ -43,7 +44,7 @@ class Ball:
             self.yvel += self.accel
         
         self.x += int(self.xvel)
-
+        self.xvel += self.xaccel
     def get_mag_vel(self):
         return math.sqrt(self.xvel**2+self.yvel**2)
 
@@ -63,7 +64,7 @@ class Grid:
         """
         Used to setup the the triangular group of nodes
         """
-        y = HEIGHT//8
+        y_gap = HEIGHT//8
         centre_node = round(WIDTH/2)
         nodes_in_row = 1
         SPACE = 40
@@ -79,12 +80,12 @@ class Grid:
                 x_coor = centre_node-(SPACE*either_side) + SPACE//2
                 
             for node in range(0, nodes_in_row):
-                    self.grid[y][x_coor] = 'N'
-                    self.node_location.append((x_coor, y))
+                    self.grid[y_gap][x_coor] = 'N'
+                    self.node_location.append((x_coor, y_gap))
                     x_coor += SPACE
             
             nodes_in_row +=1 
-            y+=SPACE
+            y_gap+=SPACE
         
        
         for node in self.node_location:
@@ -92,6 +93,19 @@ class Grid:
                 for i, x in enumerate(y[node[0]-5:node[0]+6]):
                         if math.sqrt((5-j)**2 + (5-i)**2) <= 5:
                             self.coors_to_check.append((int(node[0]+i-5),int(node[1]+j-5)))
+
+        yc = 0
+        for xc in range(0,y_gap-40):
+            if xc % 5 == 0:
+                self.grid[yc][xc] = 'L'
+                self.coors_to_check.append((xc,yc))
+                yc += 1
+        
+        for xc in range(y_gap+20, WIDTH):
+            if xc % 5 == 0:
+                self.grid[yc][xc] = 'L'
+                self.coors_to_check.append((xc,yc))
+                yc += -1
 
     def update(self):
 
@@ -113,6 +127,7 @@ class Grid:
             if coor in coors_to_check_ball:
                  
                 direction_vector = (ball.x-coor[0], ball.y-coor[1])
+                
                 mag_direction_vector = math.sqrt((ball.y-coor[1])**2+(ball.x-coor[0])**2)
                 if mag_direction_vector !=0:
                     unit_vector = (direction_vector[0]/mag_direction_vector, direction_vector[1]/mag_direction_vector)
@@ -120,6 +135,7 @@ class Grid:
                     unit_vector = direction_vector
                 
 
-                ball.xvel = int(unit_vector[0]*ball.mag_vel*self.COLLISION_CONSTANT)
+                ball.xvel = int(unit_vector[0]*ball.mag_vel)#*self.COLLISION_CONSTANT)
                 ball.yvel = int(unit_vector[1]*ball.mag_vel*self.COLLISION_CONSTANT)
                 
+                break

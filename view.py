@@ -26,7 +26,8 @@ while active:
         for x,i in enumerate(j):
             if i == "N":
                 pygame.draw.circle(window, RED, (x,y), 5)
-    
+            elif i == "L":
+                pygame.draw.rect(window, RED, (x,y,2,2) )
     grid.update()
     pygame.display.update()
     window.fill(BLACK)
