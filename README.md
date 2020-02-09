@@ -22,7 +22,7 @@ pip install pymunk
 * **Peter Lahanas**
 
 ## License
-MIT License - for more details see the [LICENSE.md](LICENSE.md) file 
+MIT License - for more details see the [LICENSE](LICENSE.md) file 
 
 ## Acknowledgments
 An introductory python project to reinforce concepts learnt at university. 
