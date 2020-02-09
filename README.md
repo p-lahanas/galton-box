@@ -9,7 +9,7 @@ For pygame:
 ```
 pip install pygame
 ```
-For pymunk
+For pymunk:
 ```
 pip install pymunk
 ```
